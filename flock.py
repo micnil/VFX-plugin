@@ -3,6 +3,7 @@ import boid.Boid as Boid
 import random
 
 boids = []
+dt=1/60
 
 def createBoids(numBoids):
 	'''create numboids boids and randomize position'''
@@ -35,7 +36,13 @@ def clear():
 
 def createKeyFrames(numFrames):
 	'''create the keyframes for the animation'''
-	pass
+	for frame in range(numFrames)
+		for boid in boids
+			boid.addVelocity([0.01, 0, 0])
+			boid.move(dt)
+			boid.setKeyframe(frame*dt)
+
+
 def alignment():
 	'''flocking function'''
 	pass
