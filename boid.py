@@ -1,10 +1,19 @@
 import maya.cmds as cmds
 
 class Boid():
-	_name = ""
+		
+	def __init__(self, x, y, z):
+		self.x = x
+		self.y = y
+		self.z = z
 
-def setPosition()
+	def setPosition(self, x, y, z):
+		self.x = x
+		self.y = y
+		self.z = z
 
-def getPosition()
+	def getPosition():
+		return self.x, self.y, self.z
 
-def move()
+	def move():
+		pass
