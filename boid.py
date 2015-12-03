@@ -10,7 +10,7 @@ class Boid:
 		self._velocity 		= V(0.0, 0.0, 0.0)
 		self._acceleration 	= V(0.0, 0.0, 0.0)
 		self._maxSpeed		= 2.0
-		self.neighborhoodRadius = 8
+		self.neighborhoodRadius = 20
 
 	def setPosition(self, x, y, z):
 		self._position = V(x, y, z)
@@ -20,6 +20,9 @@ class Boid:
 
 	def getName(self):
 		return self._name
+
+	def getVelocity(self):
+		return self._velocity
 
 	def addForce(self, force):
 		self._acceleration += force # could incorporate mass: a = F / m
