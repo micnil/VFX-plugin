@@ -67,7 +67,8 @@ def cohesion(boid):
 		if distance < boid.neighborhoodRadius:
 			neighborhood.append(distVector)
 
-	cohesionForce = sum(neighborhood) / len(neighborhood)
-	boid.addForce(cohesionForce)
+	if(len(neighborhood) > 0):
+		cohesionForce = sum(neighborhood) / len(neighborhood)
+		boid.addForce(cohesionForce)
 
 
