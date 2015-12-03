@@ -9,7 +9,7 @@ class Boid:
 		self._position 		= V(0.0, 0.0, 0.0)
 		self._velocity 		= V(0.0, 0.0, 0.0)
 		self._acceleration 	= V(0.0, 0.0, 0.0)
-		self._maxSpeed		= 40.0
+		self._maxSpeed		= 2.0
 		self.neighborhoodRadius = 8
 
 	def setPosition(self, x, y, z):

@@ -31,9 +31,9 @@ def createKeyFrames(numFrames):
 		cmds.currentTime( frame, edit=True )
 		for b in boids:
 			# example force (just until we get the boid rules right)
-			b.addForce(V(-1.0, math.sin(math.radians(frame)), 0.5))
+			#b.addForce(V(-1.0, math.sin(math.radians(frame)), 0.5))
 			#alignment(b)
-			#separation(b)
+			separation(b)
 			cohesion(b)
 			b.move(dt)
 			b.setKeyFrame(frame)
@@ -42,7 +42,7 @@ def createKeyFrames(numFrames):
 def run():
 	'''run the simulation'''
 	nFrames = 500;
-	createBoids(3)
+	createBoids(5)
 	createKeyFrames(nFrames)
 
 	cmds.playbackOptions(max=nFrames)
@@ -53,10 +53,8 @@ def run():
 def alignment():
 	'''flocking function'''
 	pass
-def separation():
-	'''flocking function'''
-	pass
-def cohesion(boid):
+
+def separation(boid):
 	'''flocking function'''
 	neighborhood = []
 	for b in boids:
@@ -68,7 +66,23 @@ def cohesion(boid):
 			neighborhood.append(distVector)
 
 	if(len(neighborhood) > 0):
-		cohesionForce = sum(neighborhood) / len(neighborhood)
+		separationForce = sum(neighborhood) / len(neighborhood)
+		boid.addForce(separationForce)
+
+def cohesion(boid):
+	'''flocking function'''
+	neighborhood = []
+	for b in boids:
+		if b.getName() == boid.getName():
+			continue
+		distVector = b.getPosition() - boid.getPosition()
+		distance = distVector.magnitude()
+		if distance < boid.neighborhoodRadius:
+			neighborhood.append(b.getPosition())
+
+	if(len(neighborhood) > 0):
+		centerPoint = sum(neighborhood) / len(neighborhood)
+		cohesionForce = centerPoint - boid.getPosition();
 		boid.addForce(cohesionForce)
 
 
