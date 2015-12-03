@@ -52,7 +52,7 @@ def run():
 
 	cmds.play()
 
-def alignment(b):
+def alignment(boid):
 	'''flocking function'''
 	c = [0,0,0]
 	for b in boids:
