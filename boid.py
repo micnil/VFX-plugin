@@ -9,16 +9,20 @@ class Boid:
 		self._position 		= V(0.0, 0.0, 0.0)
 		self._velocity 		= V(0.0, 0.0, 0.0)
 		self._acceleration 	= V(0.0, 0.0, 0.0)
-		self._maxSpeed		= 40.0;
+		self._maxSpeed		= 40.0
+		self.neighborhoodRadius = 8
 
 	def setPosition(self, x, y, z):
 		self._position = V(x, y, z)
 
-	def getPosition():
+	def getPosition(self):
 		return self._position
 
+	def getName(self):
+		return self._name
+
 	def addForce(self, force):
-		self._acceleration = force # could incorporate mass: a = F / m
+		self._acceleration += force # could incorporate mass: a = F / m
 
 	def move(self, dt):
 		self._velocity += self._acceleration * dt
