@@ -22,7 +22,6 @@ def createBoids(numBoids):
 def clear():
 	'''cleanup'''
 	while boids:
-		print boid._name
 		b = boids.pop()
 		b.delete()
 
@@ -33,6 +32,9 @@ def createKeyFrames(numFrames):
 		for b in boids:
 			# example force (just until we get the boid rules right)
 			b.addForce(V(-1.0, math.sin(math.radians(frame)), 0.5))
+			#alignment(b)
+			#separation(b)
+			cohesion(b)
 			b.move(dt)
 			b.setKeyFrame(frame)
 
@@ -54,8 +56,18 @@ def alignment():
 def separation():
 	'''flocking function'''
 	pass
-def cohesion():
+def cohesion(boid):
 	'''flocking function'''
-	pass
+	neighborhood = []
+	for b in boids:
+		if b.getName() == boid.getName():
+			continue
+		distVector = b.getPosition() - boid.getPosition()
+		distance = distVector.magnitude()
+		if distance < boid.neighborhoodRadius:
+			neighborhood.append(distVector)
+
+	cohesionForce = sum(neighborhood) / len(neighborhood)
+	boid.addForce(cohesionForce)
 
 
