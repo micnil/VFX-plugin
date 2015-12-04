@@ -4,14 +4,15 @@ import math
 
 class Boid:
 	def __init__(self, n):
-		self._object 			= cmds.polyCone(name = n, height = 0.8, radius = 0.3)
-		self._name 				= n
-		self._position 			= V(0.0, 0.0, 0.0)
-		self._velocity 			= V(0.0, 0.0, 0.0)
-		self._acceleration 		= V(0.0, 0.0, 0.0)
-		self._maxSpeed			= 4.0
-		self._maxAcceleration	= 2.0
-		self.neighborhoodRadius = 4
+		self._object		= cmds.polyCone(name = n, height = 0.8, radius = 0.3)
+		self._name 			= n
+		self._position 		= V(0.00, 0.0, 0.0)
+		self._velocity 		= V(0.01, 0.0, 0.0)
+		self._acceleration 	= V(0.01, 0.0, 0.0)
+		self._maxSpeed		= 4.0
+		self._maxForce		= 2.0
+
+		self.neighborhoodRadius = 5
 
 	def setPosition(self, x, y, z):
 		self._position = V(x, y, z)
@@ -26,13 +27,11 @@ class Boid:
 		return self._velocity
 
 	def addForce(self, force):
-		if (force.magnitude() > self._maxAcceleration):
-			force = force.magnitude(self._maxAcceleration)
+		#clamp force if it exceeds maximum.
+		if (force.magnitude() > self._maxForce):
+			force = force.magnitude(self._maxForce)
 
 		self._acceleration += force # could incorporate mass: a = F / m
-		#clamp acceleration if it exceeds maximum.
-		# if (self._acceleration.magnitude() > self._maxAcceleration):
-		# 	self._acceleration = self._acceleration.magnitude(self._maxAcceleration)
 
 	def move(self, dt):
 		self._velocity += self._acceleration * dt
@@ -42,6 +41,9 @@ class Boid:
 			self._velocity = self._velocity.magnitude(self._maxSpeed)
 
 		self._position += self._velocity * dt
+
+		# set acceleration to zero each frame
+		self._acceleration = V(0.0, 0.0, 0.0)
 
 	def setKeyFrame(self, t):
 

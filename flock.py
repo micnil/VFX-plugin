@@ -7,9 +7,9 @@ import math
 boids = []
 dt=1/100.0
 
-cWeight = 1
+cWeight = 1.0
 aWeight = 1.5
-sWeight = 3
+sWeight = 2.0
 
 def createBoids(numBoids):
 	'''create numboids boids and randomize position'''
@@ -37,6 +37,7 @@ def createKeyFrames(numFrames):
 			alignment(b)
 			separation(b)
 			cohesion(b)
+			avoidWalls(b)
 			b.move(dt)
 			b.setKeyFrame(frame)
 
@@ -105,4 +106,20 @@ def cohesion(boid):
 		cohesionForce = centerPoint - boid.getPosition();
 		boid.addForce(cohesionForce * cWeight)
 
+def avoidWalls(boid, w = 20, h = 20, d = 20):
+	position = boid.getPosition()
 
+	if position[0] > w/2:
+		boid.addForce(V(-1.0, 0.0, 0.0))
+	elif position[0] < -w/2:
+		boid.addForce(V(1.0, 0.0, 0.0))
+
+	if position[1] > h/2:
+		boid.addForce(V(0.0, -1.0, 0.0))
+	elif position[1] < -h/2:
+		boid.addForce(V(0.0, 1.0, 0.0))
+
+	if position[2] > d/2:
+		boid.addForce(V(0.0, 0.0, -1.0))
+	elif position[2] < -h/2:
+		boid.addForce(V(0.0, 0.0, 1.0))
