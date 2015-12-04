@@ -7,9 +7,9 @@ import math
 boids = []
 dt=1/100.0
 
-cWeight = 5
-aWeight = 5
-sWeight = 5
+cWeight = 1
+aWeight = 1.5
+sWeight = 3
 
 def createBoids(numBoids):
 	'''create numboids boids and randomize position'''
@@ -43,8 +43,8 @@ def createKeyFrames(numFrames):
 
 def run():
 	'''run the simulation'''
-	nFrames = 5000;
-	createBoids(5)
+	nFrames = 2000;
+	createBoids(20)
 	createKeyFrames(nFrames)
 
 	cmds.playbackOptions(max=nFrames)
@@ -54,33 +54,33 @@ def run():
 
 def alignment(boid):
 	'''flocking function'''
-	#c = [0,0,0]
 	neighborhood = []
 	for b in boids:
 
 		if b.getName() == boid.getName():
 			continue
-			#c+= b.getPosition
-		distVector = b.getPosition() - boid.getPosition()
-		distance = distVector.magnitude()
+
+		distance = vectors.distance(b.getPosition(), boid.getPosition())
+
 		if distance < boid.neighborhoodRadius:
 			neighborhood.append(b.getVelocity())
-		#c /= len(boids) -1
+
 	if(len(neighborhood) > 0):
 		avgVelocity = sum(neighborhood) / len(neighborhood)
 		alignmentForce = avgVelocity - boid.getVelocity()
 		boid.addForce(alignmentForce * aWeight)
 
-	#boid.addForce((c - b.getPosition)/100)
-
 def separation(boid):
 	'''flocking function'''
 	neighborhood = []
 	for b in boids:
+
 		if b.getName() == boid.getName():
 			continue
+
 		distVector = b.getPosition() - boid.getPosition()
 		distance = distVector.magnitude()
+
 		if distance < boid.neighborhoodRadius:
 			neighborhood.append(distVector)
 
@@ -89,14 +89,14 @@ def separation(boid):
 		boid.addForce(separationForce * sWeight)
 
 def cohesion(boid):
-
 	'''flocking function'''
 	neighborhood = []
 	for b in boids:
 		if b.getName() == boid.getName():
 			continue
-		distVector = b.getPosition() - boid.getPosition()
-		distance = distVector.magnitude()
+
+		distance = vectors.distance(b.getPosition(), boid.getPosition())
+
 		if distance < boid.neighborhoodRadius:
 			neighborhood.append(b.getPosition())
 
