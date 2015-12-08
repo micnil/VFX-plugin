@@ -7,9 +7,9 @@ import math
 boids = []
 dt=1/100.0
 
-cWeight = 5
-aWeight = 5
-sWeight = 5
+cWeight = 1.0
+aWeight = 1.5
+sWeight = 2.0
 
 def createBoids(numBoids):
 	'''create numboids boids and randomize position'''
@@ -37,14 +37,15 @@ def createKeyFrames(numFrames):
 			alignment(b)
 			separation(b)
 			cohesion(b)
+			avoidWalls(b)
 			b.move(dt)
 			b.setKeyFrame(frame)
 
 
 def run():
 	'''run the simulation'''
-	nFrames = 5000;
-	createBoids(5)
+	nFrames = 2000;
+	createBoids(20)
 	createKeyFrames(nFrames)
 
 	cmds.playbackOptions(max=nFrames)
@@ -54,33 +55,33 @@ def run():
 
 def alignment(boid):
 	'''flocking function'''
-	#c = [0,0,0]
 	neighborhood = []
 	for b in boids:
 
 		if b.getName() == boid.getName():
 			continue
-			#c+= b.getPosition
-		distVector = b.getPosition() - boid.getPosition()
-		distance = distVector.magnitude()
+
+		distance = vectors.distance(b.getPosition(), boid.getPosition())
+
 		if distance < boid.neighborhoodRadius:
 			neighborhood.append(b.getVelocity())
-		#c /= len(boids) -1
+
 	if(len(neighborhood) > 0):
 		avgVelocity = sum(neighborhood) / len(neighborhood)
 		alignmentForce = avgVelocity - boid.getVelocity()
 		boid.addForce(alignmentForce * aWeight)
 
-	#boid.addForce((c - b.getPosition)/100)
-
 def separation(boid):
 	'''flocking function'''
 	neighborhood = []
 	for b in boids:
+
 		if b.getName() == boid.getName():
 			continue
+
 		distVector = b.getPosition() - boid.getPosition()
 		distance = distVector.magnitude()
+
 		if distance < boid.neighborhoodRadius:
 			neighborhood.append(distVector)
 
@@ -89,14 +90,14 @@ def separation(boid):
 		boid.addForce(separationForce * sWeight)
 
 def cohesion(boid):
-
 	'''flocking function'''
 	neighborhood = []
 	for b in boids:
 		if b.getName() == boid.getName():
 			continue
-		distVector = b.getPosition() - boid.getPosition()
-		distance = distVector.magnitude()
+
+		distance = vectors.distance(b.getPosition(), boid.getPosition())
+
 		if distance < boid.neighborhoodRadius:
 			neighborhood.append(b.getPosition())
 
@@ -105,4 +106,20 @@ def cohesion(boid):
 		cohesionForce = centerPoint - boid.getPosition();
 		boid.addForce(cohesionForce * cWeight)
 
+def avoidWalls(boid, w = 20, h = 20, d = 20):
+	position = boid.getPosition()
 
+	if position[0] > w/2:
+		boid.addForce(V(-1.0, 0.0, 0.0))
+	elif position[0] < -w/2:
+		boid.addForce(V(1.0, 0.0, 0.0))
+
+	if position[1] > h/2:
+		boid.addForce(V(0.0, -1.0, 0.0))
+	elif position[1] < -h/2:
+		boid.addForce(V(0.0, 1.0, 0.0))
+
+	if position[2] > d/2:
+		boid.addForce(V(0.0, 0.0, -1.0))
+	elif position[2] < -h/2:
+		boid.addForce(V(0.0, 0.0, 1.0))
