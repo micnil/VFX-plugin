@@ -8,16 +8,16 @@ boids = []
 dt=1/100.0
 
 cWeight = 1.0
-aWeight = 1.5
+aWeight = 1.0
 sWeight = 2.0
 
 def createBoids(numBoids):
 	'''create numboids boids and randomize position'''
 	for i in range(numBoids):
 		b = Boid("boid{0}".format(i))
-		x = random.uniform(-5, 5);
-		y = random.uniform(-5, 5);
-		z = random.uniform(-5, 5);
+		x = random.uniform(-5, 5)
+		y = random.uniform(-5, 5)
+		z = random.uniform(-5, 5)
 		b.setPosition(x, y, z)
 		boids.append(b)
 
@@ -108,18 +108,26 @@ def cohesion(boid):
 
 def avoidWalls(boid, w = 20, h = 20, d = 20):
 	position = boid.getPosition()
+	boundaryTranslation = (0, 0, 0)
+	if cmds.objExists("boundary"):
+		boundaryTranslation = cmds.getAttr("boundary.translate")[0]
+		boundaryScale = cmds.getAttr("boundary.scale")[0]
+		w = cmds.polyCube("boundary", query=True, width=True) * boundaryScale[0]
+		h = cmds.polyCube("boundary", query=True, height=True) * boundaryScale[1]
+		d = cmds.polyCube("boundary", query=True, depth=True) * boundaryScale[2]
 
-	if position[0] > w/2:
-		boid.addForce(V(-1.0, 0.0, 0.0))
-	elif position[0] < -w/2:
-		boid.addForce(V(1.0, 0.0, 0.0))
 
-	if position[1] > h/2:
-		boid.addForce(V(0.0, -1.0, 0.0))
-	elif position[1] < -h/2:
-		boid.addForce(V(0.0, 1.0, 0.0))
+	if position[0] > boundaryTranslation[0] + w/2:
+		boid.addForce(V(-2.0, 0.0, 0.0))
+	elif position[0] < boundaryTranslation[0] - w/2:
+		boid.addForce(V(2.0, 0.0, 0.0))
 
-	if position[2] > d/2:
-		boid.addForce(V(0.0, 0.0, -1.0))
-	elif position[2] < -h/2:
-		boid.addForce(V(0.0, 0.0, 1.0))
+	if position[1] > boundaryTranslation[1] + h/2:
+		boid.addForce(V(0.0, -2.0, 0.0))
+	elif position[1] < boundaryTranslation[1] - h/2:
+		boid.addForce(V(0.0, 2.0, 0.0))
+
+	if position[2] > boundaryTranslation[2] + d/2:
+		boid.addForce(V(0.0, 0.0, -2.0))
+	elif position[2] < boundaryTranslation[2] - h/2:
+		boid.addForce(V(0.0, 0.0, 2.0))
