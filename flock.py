@@ -4,14 +4,16 @@ from boundary import Boundary
 import vectors ; from vectors import *
 import random
 import math
+import os.path
+import sys
 
 boids = []
 boundary = Boundary()
 dt=1/100.0
 
 cWeight = 1.0
-aWeight = 1.0
-sWeight = 2.0
+aWeight = 2.0
+sWeight = 1.5
 
 def createBoids(numBoids):
 	'''create numboids boids and randomize position'''
@@ -39,12 +41,47 @@ def createKeyFrames(numFrames, boundary):
 	for frame in range(numFrames):
 		cmds.currentTime( frame, edit=True )
 		for b in boids:
-			alignment(b)
-			separation(b)
-			cohesion(b)
+
+			# How to stop a running maya script:
+			# When a script is running in maya, Everything
+			# freezes and maya does not repond to input.
+			# To get around this maya has to be stopped from
+			# the outside. This if-statement looks for a empty file
+			# named "stop.maya" anywhere you want in your filesystem.
+			# If it is found, maya exits the script. To stop a script,
+			# just add this file to your defined path and it exits. When
+			# you want to start the script again, just rename it to something
+			# else, eg: run.maya.
+			if os.path.isfile('C:\\dev\\stop.maya'):
+				sys.exit()
+
+			neighborhood = getNeighborhood(b)
+			alignment(b, neighborhood)
+			separation(b, neighborhood)
+			cohesion(b, neighborhood)
 			boundary.avoidWalls(b)
 			b.move(dt)
 			b.setKeyFrame(frame)
+
+def limit(v, limit):
+	#clamp vector if it exceeds magnitude limit.
+	if (v.magnitude() > limit):
+		v = v.magnitude(limit)
+
+	return v;
+
+def getNeighborhood(boid):
+	neighborhood = []
+	for b in boids:
+
+		if b.getName() == boid.getName():
+			continue
+
+		distance = vectors.distance(b.getPosition(), boid.getPosition())
+		if distance < boid.neighborhoodRadius:
+			neighborhood.append(b)
+
+	return neighborhood
 
 
 def run():
@@ -52,7 +89,7 @@ def run():
 	nFrames = 2000
 
 	boundary.setFromName('boundary')
-	createBoids(20)
+	createBoids(40)
 	createKeyFrames(nFrames, boundary)
 
 	cmds.playbackOptions(max=nFrames)
@@ -60,55 +97,41 @@ def run():
 
 	cmds.play()
 
-def alignment(boid):
+def alignment(boid, neighborhood):
 	'''flocking function'''
-	neighborhood = []
-	for b in boids:
-
-		if b.getName() == boid.getName():
-			continue
-
-		distance = vectors.distance(b.getPosition(), boid.getPosition())
-
-		if distance < boid.neighborhoodRadius:
-			neighborhood.append(b.getVelocity())
+	velocities = []
+	for b in neighborhood:
+		velocities.append(b.getVelocity())
 
 	if(len(neighborhood) > 0):
-		avgVelocity = sum(neighborhood) / len(neighborhood)
-		alignmentForce = avgVelocity - boid.getVelocity()
-		boid.addForce(alignmentForce * aWeight)
+		avgVelocity = sum(velocities) / len(neighborhood)
+		alignmentForce = avgVelocity.magnitude(boid._maxSpeed) - boid.getVelocity()
+		alignmentForce = limit(alignmentForce * aWeight, 2.0)
+		#print "alignment"
+		boid.addForce(alignmentForce)
 
-def separation(boid):
+def separation(boid, neighborhood):
 	'''flocking function'''
-	neighborhood = []
-	for b in boids:
-
-		if b.getName() == boid.getName():
-			continue
-
-		distVector = b.getPosition() - boid.getPosition()
-		distance = distVector.magnitude()
-
-		if distance < boid.neighborhoodRadius:
-			neighborhood.append(distVector)
+	distances = []
+	for b in neighborhood:
+		distVector = boid.getPosition() - b.getPosition()
+		distances.append(distVector)
 
 	if(len(neighborhood) > 0):
-		separationForce = (sum(neighborhood) / len(neighborhood)) * V(-1, -1, -1)
-		boid.addForce(separationForce * sWeight)
+		separationForce = (sum(distances) / len(neighborhood))
+		separationForce = limit(separationForce * sWeight, 2.0)
+		#print "separation"
+		boid.addForce(separationForce)
 
-def cohesion(boid):
+def cohesion(boid, neighborhood):
 	'''flocking function'''
-	neighborhood = []
-	for b in boids:
-		if b.getName() == boid.getName():
-			continue
-
-		distance = vectors.distance(b.getPosition(), boid.getPosition())
-
-		if distance < boid.neighborhoodRadius:
-			neighborhood.append(b.getPosition())
+	positions = []
+	for b in neighborhood:
+		positions.append(b.getPosition())
 
 	if(len(neighborhood) > 0):
-		centerPoint = sum(neighborhood) / len(neighborhood)
+		centerPoint = sum(positions) / len(neighborhood)
 		cohesionForce = centerPoint - boid.getPosition();
-		boid.addForce(cohesionForce * cWeight)
+		cohesionForce = limit(cohesionForce * cWeight, 2.0)
+		#print "cohesionForce"
+		boid.addForce(cohesionForce)
