@@ -26,7 +26,6 @@ class Boid:
 		return self._velocity
 
 	def addForce(self, force):
-		#print force.magnitude()
 		self._acceleration += force # could incorporate mass: a = F / m
 
 	def move(self, dt):

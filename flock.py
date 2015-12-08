@@ -22,9 +22,9 @@ def createBoids(numBoids):
 	for i in range(numBoids):
 		b = Boid("boid{0}".format(i))
 
-		x = random.uniform(boundaryPos[0]-boundaryDim[0]/2 , boundaryPos[0]+boundaryDim[0]/2)
-		y = random.uniform(boundaryPos[1]-boundaryDim[1]/2 , boundaryPos[1]+boundaryDim[1]/2)
-		z = random.uniform(boundaryPos[2]-boundaryDim[2]/2 , boundaryPos[2]+boundaryDim[2]/2)
+		x = random.uniform(boundaryPos[0]-boundaryDim[0]/2, boundaryPos[0]+boundaryDim[0]/2)
+		y = random.uniform(boundaryPos[1]-boundaryDim[1]/2, boundaryPos[1]+boundaryDim[1]/2)
+		z = random.uniform(boundaryPos[2]-boundaryDim[2]/2, boundaryPos[2]+boundaryDim[2]/2)
 		b.setPosition(x, y, z)
 		boids.append(b)
 
@@ -32,6 +32,8 @@ def createBoids(numBoids):
 
 def clear():
 	'''cleanup'''
+	cmds.select(cmds.ls("boid*"), r=True)
+	cmds.delete()
 	while boids:
 		b = boids.pop()
 		b.delete()
@@ -60,6 +62,7 @@ def createKeyFrames(numFrames, boundary):
 			separation(b, neighborhood)
 			cohesion(b, neighborhood)
 			boundary.avoidWalls(b)
+			followPath(b)
 			b.move(dt)
 			b.setKeyFrame(frame)
 
@@ -83,6 +86,50 @@ def getNeighborhood(boid):
 
 	return neighborhood
 
+def alignment(boid, neighborhood):
+	'''flocking function'''
+	velocities = []
+	for b in neighborhood:
+		velocities.append(b.getVelocity())
+
+	if(len(neighborhood) > 0):
+		avgVelocity = sum(velocities) / len(neighborhood)
+		alignmentForce = avgVelocity.magnitude(boid._maxSpeed) - boid.getVelocity()
+		alignmentForce = limit(alignmentForce * aWeight, 2.0)
+		boid.addForce(alignmentForce)
+
+def separation(boid, neighborhood):
+	'''flocking function'''
+	distances = []
+	for b in neighborhood:
+		distVector = boid.getPosition() - b.getPosition()
+		distances.append(distVector)
+
+	if(len(neighborhood) > 0):
+		separationForce = (sum(distances) / len(neighborhood))
+		separationForce = limit(separationForce * sWeight, 2.0)
+		boid.addForce(separationForce)
+
+def cohesion(boid, neighborhood):
+	'''flocking function'''
+	positions = []
+	for b in neighborhood:
+		positions.append(b.getPosition())
+
+	if(len(neighborhood) > 0):
+		centerPoint = sum(positions) / len(neighborhood)
+		cohesionForce = centerPoint - boid.getPosition();
+		cohesionForce = limit(cohesionForce * cWeight, 2.0)
+		boid.addForce(cohesionForce)
+
+def followPath(boid):
+	if cmds.objExists("locator"):
+		pathPoint = cmds.getAttr("locator.translate")[0]
+		# for b in boids:
+		# 	seekForce = V(pathPoint) - b.getPosition()
+		# 	b.addForce(seekForce)
+		seekForce = V(pathPoint) - boid.getPosition()
+		boid.addForce(seekForce)
 
 def run():
 	'''run the simulation'''
@@ -96,42 +143,3 @@ def run():
 	cmds.playbackOptions(aet=nFrames)
 
 	cmds.play()
-
-def alignment(boid, neighborhood):
-	'''flocking function'''
-	velocities = []
-	for b in neighborhood:
-		velocities.append(b.getVelocity())
-
-	if(len(neighborhood) > 0):
-		avgVelocity = sum(velocities) / len(neighborhood)
-		alignmentForce = avgVelocity.magnitude(boid._maxSpeed) - boid.getVelocity()
-		alignmentForce = limit(alignmentForce * aWeight, 2.0)
-		#print "alignment"
-		boid.addForce(alignmentForce)
-
-def separation(boid, neighborhood):
-	'''flocking function'''
-	distances = []
-	for b in neighborhood:
-		distVector = boid.getPosition() - b.getPosition()
-		distances.append(distVector)
-
-	if(len(neighborhood) > 0):
-		separationForce = (sum(distances) / len(neighborhood))
-		separationForce = limit(separationForce * sWeight, 2.0)
-		#print "separation"
-		boid.addForce(separationForce)
-
-def cohesion(boid, neighborhood):
-	'''flocking function'''
-	positions = []
-	for b in neighborhood:
-		positions.append(b.getPosition())
-
-	if(len(neighborhood) > 0):
-		centerPoint = sum(positions) / len(neighborhood)
-		cohesionForce = centerPoint - boid.getPosition();
-		cohesionForce = limit(cohesionForce * cWeight, 2.0)
-		#print "cohesionForce"
-		boid.addForce(cohesionForce)
