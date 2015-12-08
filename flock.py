@@ -37,6 +37,7 @@ def createKeyFrames(numFrames):
 			alignment(b)
 			separation(b)
 			cohesion(b)
+			followPath(b)
 			avoidWalls(b)
 			b.move(dt)
 			b.setKeyFrame(frame)
@@ -131,3 +132,12 @@ def avoidWalls(boid, w = 20, h = 20, d = 20):
 		boid.addForce(V(0.0, 0.0, -2.0))
 	elif position[2] < boundaryTranslation[2] - h/2:
 		boid.addForce(V(0.0, 0.0, 2.0))
+		
+def followPath(boid):
+	if cmds.objExists("locator"):
+		pathPoint = cmds.getAttr("locator.translate")[0]
+		for b in boids:
+			seekForce = V(pathPoint) - b.getPosition()
+			b.addForce(seekForce)
+			
+			
