@@ -147,5 +147,5 @@ def followPath(boid):
 			seekForce = V(pathPoint) - b.getPosition()
 			b.addForce(seekForce)
 			
-		boid.addForce(cohesionForce * cWeight)
+		#boid.addForce(cohesionForce * cWeight)
 
