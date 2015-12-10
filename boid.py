@@ -10,7 +10,7 @@ class Boid:
 		self._velocity 		= V.random()
 		self._acceleration 	= V(0.01, 0.0, 0.0)
 		self._maxSpeed		= 4.0
-
+		self.wanderVector 	= V(0.0, 1.0, 0.0)
 		self.neighborhoodRadius = 5
 
 	def setPosition(self, x, y, z):

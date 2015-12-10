@@ -3,7 +3,7 @@ import vectors ; from vectors import *
 import math
 
 class Boundary:
-	def __init__(self, w = 20.0, h = 20.0, d = 20.0, x = 0.0, y = 0.0, z = 0.0):
+	def __init__(self, w = 17.0, h = 17.0, d = 17.0, x = 0.0, y = 0.0, z = 0.0):
 		self.dimensions = V(w, h, d)
 		self.boidSpawnBoundary = 0.2 # works as a padding in percentage
 		self.position = V(x, y, z)

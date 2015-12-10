@@ -63,6 +63,7 @@ def createKeyFrames(numFrames, boundary):
 			cohesion(b, neighborhood)
 			boundary.avoidWalls(b)
 			followPath(b)
+			wander(b)
 			b.move(dt)
 			b.setKeyFrame(frame)
 
@@ -107,7 +108,7 @@ def separation(boid, neighborhood):
 
 	if(len(neighborhood) > 0):
 		separationForce = (sum(distances) / len(neighborhood))
-		separationForce = limit(separationForce * sWeight, 2.0)
+		separationForce = limit(separationForce * sWeight, 2.3)
 		boid.addForce(separationForce)
 
 def cohesion(boid, neighborhood):
@@ -130,6 +131,22 @@ def followPath(boid):
 		# 	b.addForce(seekForce)
 		seekForce = V(pathPoint) - boid.getPosition()
 		boid.addForce(seekForce)
+
+def wander(boid):
+	velocity = boid.getVelocity()
+	sphereCenter = boid.getPosition() + velocity.magnitude(3)
+
+	randomVector = V.random()
+	while randomVector ==  boid.wanderVector:
+		randomVector = V.random()
+	rotationAxis = boid.wanderVector.cross(randomVector)
+
+	rotationAngle = random.uniform(-1, 1) * (math.pi / 9.0)
+	rotatedVector = M.rotate(rotationAxis, rotationAngle) * boid.wanderVector
+	boid.wanderVector = V(rotatedVector[0], rotatedVector[1], rotatedVector[2])
+	wanderForce = (sphereCenter + boid.wanderVector) - boid.getPosition()
+	limit(wanderForce, 1.0)
+	boid.addForce(wanderForce)
 
 def run():
 	'''run the simulation'''
