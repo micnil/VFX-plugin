@@ -6,11 +6,10 @@ class Boid:
 	def __init__(self, n):
 		self._object		= cmds.polyCone(name = n, height = 0.8, radius = 0.3)
 		self._name 			= n
-		self._position 		= V(0.00, 0.0, 0.0)
-		self._velocity 		= V(0.01, 0.0, 0.0)
+		self._position 		= V(0.0, 0.0, 0.0)
+		self._velocity 		= V.random()
 		self._acceleration 	= V(0.01, 0.0, 0.0)
 		self._maxSpeed		= 4.0
-		self._maxForce		= 2.0
 
 		self.neighborhoodRadius = 5
 
@@ -27,10 +26,6 @@ class Boid:
 		return self._velocity
 
 	def addForce(self, force):
-		#clamp force if it exceeds maximum.
-		if (force.magnitude() > self._maxForce):
-			force = force.magnitude(self._maxForce)
-
 		self._acceleration += force # could incorporate mass: a = F / m
 
 	def move(self, dt):
