@@ -14,6 +14,7 @@ dt=1/100.0
 cWeight = 1.0
 aWeight = 2.0
 sWeight = 1.5
+oWeight = 5.0
 
 def createBoids(numBoids):
 	'''create numboids boids and randomize position'''
@@ -63,6 +64,7 @@ def createKeyFrames(numFrames, boundary):
 			cohesion(b, neighborhood)
 			boundary.avoidWalls(b)
 			followPath(b)
+			obstacleAvoidsance(b)
 			wander(b)
 			b.move(dt)
 			b.setKeyFrame(frame)
@@ -147,10 +149,24 @@ def wander(boid):
 	wanderForce = (sphereCenter + boid.wanderVector) - boid.getPosition()
 	limit(wanderForce, 1.0)
 	boid.addForce(wanderForce)
+	
+def obstacleAvoidsance(boid):
+
+	#string = pCylinderShape
+	if cmds.objExists("pCylinderShape*"):
+		#print cmds.ls("pCylinderShape*")
+		
+		objPos = V(cmds.getAttr("pCylinder1.translate")[0])
+		
+		avoidanceForce = oWeight * -(objPos - boid.getPosition())
+		
+		if(objPos.distance(boid.getPosition()) < 2.0):
+			print avoidanceForce
+			boid.addForce(avoidanceForce)
 
 def run():
 	'''run the simulation'''
-	nFrames = 2000
+	nFrames = 2000	
 
 	boundary.setFromName('boundary')
 	createBoids(40)
