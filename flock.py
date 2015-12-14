@@ -13,7 +13,7 @@ dt=1/100.0
 
 cWeight = 1.0
 aWeight = 2.0
-sWeight = 1.5
+sWeight = 2.0
 
 def createBoids(numBoids):
 	'''create numboids boids and randomize position'''
@@ -21,7 +21,6 @@ def createBoids(numBoids):
 	boundaryDim = boundary.getSpawnDimensions()
 	for i in range(numBoids):
 		b = Boid("boid{0}".format(i))
-
 		x = random.uniform(boundaryPos[0]-boundaryDim[0]/2, boundaryPos[0]+boundaryDim[0]/2)
 		y = random.uniform(boundaryPos[1]-boundaryDim[1]/2, boundaryPos[1]+boundaryDim[1]/2)
 		z = random.uniform(boundaryPos[2]-boundaryDim[2]/2, boundaryPos[2]+boundaryDim[2]/2)
@@ -126,10 +125,8 @@ def cohesion(boid, neighborhood):
 def followPath(boid):
 	if cmds.objExists("locator"):
 		pathPoint = cmds.getAttr("locator.translate")[0]
-		# for b in boids:
-		# 	seekForce = V(pathPoint) - b.getPosition()
-		# 	b.addForce(seekForce)
 		seekForce = V(pathPoint) - boid.getPosition()
+		seekForce = limit(seekForce, 3)
 		boid.addForce(seekForce)
 
 def wander(boid):
@@ -141,7 +138,7 @@ def wander(boid):
 		randomVector = V.random()
 	rotationAxis = boid.wanderVector.cross(randomVector)
 
-	rotationAngle = random.uniform(-1, 1) * (math.pi / 9.0)
+	rotationAngle = random.uniform(-1, 1) * vectors.radians(5)
 	rotatedVector = M.rotate(rotationAxis, rotationAngle) * boid.wanderVector
 	boid.wanderVector = V(rotatedVector[0], rotatedVector[1], rotatedVector[2])
 	wanderForce = (sphereCenter + boid.wanderVector) - boid.getPosition()
