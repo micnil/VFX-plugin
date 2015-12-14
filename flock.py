@@ -1,6 +1,7 @@
 import maya.cmds as cmds
 from boid import Boid
 from boundary import Boundary
+from obstacle import Obstacle
 import vectors ; from vectors import *
 import random
 import math
@@ -8,12 +9,14 @@ import os.path
 import sys
 
 boids = []
+obstacles = []
 boundary = Boundary()
 dt=1/100.0
 
 cWeight = 1.0
 aWeight = 2.0
 sWeight = 2.0
+oWeight = 5.0
 
 def createBoids(numBoids):
 	'''create numboids boids and randomize position'''
@@ -29,6 +32,12 @@ def createBoids(numBoids):
 
 	print 'creating boids done'
 
+def createObstacles():
+	obstacleNames = cmds.ls("obstacle*", transforms = True)
+	for obstacleName in obstacleNames:
+		obstacle = Obstacle(obstacleName)
+		obstacles.append(obstacle)
+
 def clear():
 	'''cleanup'''
 	cmds.select(cmds.ls("boid*"), r=True)
@@ -36,6 +45,9 @@ def clear():
 	while boids:
 		b = boids.pop()
 		b.delete()
+	while obstacles:
+		o = obstacles.pop()
+		o.delete()
 
 def createKeyFrames(numFrames, boundary):
 	'''create the keyframes for the animation'''
@@ -62,6 +74,7 @@ def createKeyFrames(numFrames, boundary):
 			cohesion(b, neighborhood)
 			boundary.avoidWalls(b)
 			followPath(b)
+			obstacleAvoidance(b)
 			wander(b)
 			b.move(dt)
 			b.setKeyFrame(frame)
@@ -145,15 +158,50 @@ def wander(boid):
 	limit(wanderForce, 1.0)
 	boid.addForce(wanderForce)
 
+# def obstacleAvoidance(boid):
+
+# 	if cmds.objExists("pCylinderShape*"):
+# 		objPos = V(cmds.getAttr("pCylinder1.translate")[0])
+
+# 		avoidanceForce = oWeight * -(objPos - boid.getPosition())
+
+# 		if(objPos.distance(boid.getPosition()) < 2.0):
+# 			print avoidanceForce
+# 			boid.addForce(avoidanceForce)
+def obstacleAvoidance(boid):
+	position = boid.getPosition()
+	ahead = position + boid.getVelocity()
+	ahead2 = ahead * 0.5
+	closestObstacle = None
+
+	#find closest obstacle
+	for obstacle in obstacles:
+		intersects1 = obstacle.intersects(ahead)
+		intersects2 = obstacle.intersects(ahead2)
+		if(intersects1 or intersects2):
+			distance = obstacle.distanceFrom(boid.getPosition())
+			if(closestObstacle is None or closestObstacle.distanceFrom(boid.getPosition()) > distance):
+				closestObstacle = obstacle
+
+	if closestObstacle is not None:
+		avoidanceForce = obstacle.orthoProject(ahead) * (-1)
+		avoidanceForce = limit(avoidanceForce, 6)
+		avoidanceForce *= oWeight
+		boid.addForce(avoidanceForce)
+
+
+
 def run():
 	'''run the simulation'''
 	nFrames = 2000
 
 	boundary.setFromName('boundary')
 	createBoids(40)
+	createObstacles()
 	createKeyFrames(nFrames, boundary)
 
 	cmds.playbackOptions(max=nFrames)
 	cmds.playbackOptions(aet=nFrames)
+
 
 	cmds.play()
