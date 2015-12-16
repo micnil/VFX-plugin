@@ -16,7 +16,7 @@ dt=1/100.0
 cWeight = 1.0
 aWeight = 2.0
 sWeight = 2.0
-oWeight = 5.0
+oWeight = 4.0
 
 def createBoids(numBoids):
 	'''create numboids boids and randomize position'''
@@ -170,7 +170,7 @@ def wander(boid):
 # 			boid.addForce(avoidanceForce)
 def obstacleAvoidance(boid):
 	position = boid.getPosition()
-	ahead = position + boid.getVelocity()
+	ahead = position + boid.getVelocity().magnitude(1.5)
 	ahead2 = ahead * 0.5
 	closestObstacle = None
 
@@ -185,7 +185,7 @@ def obstacleAvoidance(boid):
 
 	if closestObstacle is not None:
 		avoidanceForce = obstacle.orthoProject(ahead) * (-1)
-		avoidanceForce = limit(avoidanceForce, 6)
+		avoidanceForce = limit(avoidanceForce, 5)
 		avoidanceForce *= oWeight
 		boid.addForce(avoidanceForce)
 
