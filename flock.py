@@ -15,8 +15,8 @@ dt=1/100.0
 
 cWeight = 1.0
 aWeight = 2.0
-sWeight = 2.0
-oWeight = 4.0
+sWeight = 1.5
+oWeight = 6.0
 pWeight = 1.0
 
 def createBoids(numBoids):
@@ -121,7 +121,7 @@ def separation(boid, neighborhood):
 
 	if(len(neighborhood) > 0):
 		separationForce = (sum(distances) / len(neighborhood))
-		separationForce = limit(separationForce * sWeight, 2.3)
+		separationForce = limit(separationForce * sWeight, 2.2)
 		boid.addForce(separationForce)
 
 def cohesion(boid, neighborhood):
@@ -141,8 +141,7 @@ def followPath(boid):
 		pathPoint = cmds.getAttr("locator.translate")[0]
 		seekForce = V(pathPoint) - boid.getPosition()
 		boid.addForce(seekForce * pWeight)
-		seekForce = limit(seekForce, 3)
-		
+		seekForce = limit(seekForce, 1.5)
 
 def wander(boid):
 	velocity = boid.getVelocity()
@@ -160,20 +159,10 @@ def wander(boid):
 	limit(wanderForce, 1.0)
 	boid.addForce(wanderForce)
 
-# def obstacleAvoidance(boid):
-
-# 	if cmds.objExists("pCylinderShape*"):
-# 		objPos = V(cmds.getAttr("pCylinder1.translate")[0])
-
-# 		avoidanceForce = oWeight * -(objPos - boid.getPosition())
-
-# 		if(objPos.distance(boid.getPosition()) < 2.0):
-# 			print avoidanceForce
-# 			boid.addForce(avoidanceForce)
 def obstacleAvoidance(boid):
 	position = boid.getPosition()
-	ahead = position + boid.getVelocity().magnitude(1.5)
-	ahead2 = ahead * 0.5
+	ahead = position + boid.getVelocity().magnitude(1.6)
+	ahead2 = position + boid.getVelocity().magnitude(0.8)
 	closestObstacle = None
 
 	#find closest obstacle
@@ -182,12 +171,13 @@ def obstacleAvoidance(boid):
 		intersects2 = obstacle.intersects(ahead2)
 		if(intersects1 or intersects2):
 			distance = obstacle.distanceFrom(boid.getPosition())
-			if(closestObstacle is None or closestObstacle.distanceFrom(boid.getPosition()) > distance):
+			if((closestObstacle is None) or (closestObstacle.distanceFrom(boid.getPosition()) > distance)):
 				closestObstacle = obstacle
 
+	#avoid closest obstacle
 	if closestObstacle is not None:
-		avoidanceForce = obstacle.orthoProject(ahead) * (-1)
-		avoidanceForce = limit(avoidanceForce, 5)
+		avoidanceForce = closestObstacle.orthoProject(ahead)
+		avoidanceForce = limit(avoidanceForce, 10.0)
 		avoidanceForce *= oWeight
 		boid.addForce(avoidanceForce)
 
