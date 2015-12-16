@@ -17,6 +17,7 @@ cWeight = 1.0
 aWeight = 2.0
 sWeight = 2.0
 oWeight = 4.0
+pWeight = 1.0
 
 def createBoids(numBoids):
 	'''create numboids boids and randomize position'''
@@ -139,8 +140,9 @@ def followPath(boid):
 	if cmds.objExists("locator"):
 		pathPoint = cmds.getAttr("locator.translate")[0]
 		seekForce = V(pathPoint) - boid.getPosition()
+		boid.addForce(seekForce * pWeight)
 		seekForce = limit(seekForce, 3)
-		boid.addForce(seekForce)
+		
 
 def wander(boid):
 	velocity = boid.getVelocity()
