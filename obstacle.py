@@ -43,7 +43,7 @@ class Obstacle:
 		ObstacleToV = v - self.position
 		parallel = (ObstacleToV.dot(self.direction)) * self.direction
 		orthogonal = v - (self.position + parallel)
-		return orthogonal
+		return orthogonal.magnitude(self.radius - orthogonal.magnitude())
 
 	def delete(self):
 		cmds.delete(at = self._name)

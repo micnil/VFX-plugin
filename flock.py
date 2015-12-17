@@ -12,6 +12,7 @@ boids = []
 obstacles = []
 boundary = Boundary()
 dt=1/100.0
+locator = ''
 
 cWeight = 1.0
 aWeight = 2.0
@@ -137,8 +138,8 @@ def cohesion(boid, neighborhood):
 		boid.addForce(cohesionForce)
 
 def followPath(boid):
-	if cmds.objExists("locator"):
-		pathPoint = cmds.getAttr("locator.translate")[0]
+	if cmds.objExists(locator):
+		pathPoint = cmds.getAttr("{0}.translate".format(locator))[0]
 		seekForce = V(pathPoint) - boid.getPosition()
 		boid.addForce(seekForce * pWeight)
 		seekForce = limit(seekForce, 1.5)
@@ -183,12 +184,13 @@ def obstacleAvoidance(boid):
 
 
 
-def run():
+def run(numBoids, numFrames, boundaryName = 'boundary', locatorName = 'locator'):
 	'''run the simulation'''
-	nFrames = 2000
-
-	boundary.setFromName('boundary')
-	createBoids(40)
+	nFrames = 5000
+	global locator
+	locator = locatorName
+	boundary.setFromName(boundaryName)
+	createBoids(numBoids)
 	createObstacles()
 	createKeyFrames(nFrames, boundary)
 
